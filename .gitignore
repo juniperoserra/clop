@@ -12,6 +12,9 @@ node_modules
 # Optional npm cache directory
 .npm
 
+# Ide-specific
+.vscode
+
 /unused/
 /dist/
 
