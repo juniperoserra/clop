@@ -4,9 +4,9 @@
   "description": "A Command-Line OPtions argument processing utility.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha --reporter spec --compilers js:babel-core/register test/**/*.js",
-    "build": "cross-env webpack --env=prod",
-    "watch": "cross-env webpack --env=prod --watch"
+    "test": "cross-env BABEL_ENV=test mocha --reporter spec --compilers js:babel-core/register test/**/*.js",
+    "build": "cross-env BABEL_ENV=production webpack --env=prod",
+    "watch": "cross-env BABEL_ENV=production webpack --env=prod --watch"
   },
   "repository": {
     "type": "git",
