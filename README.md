@@ -117,7 +117,7 @@ If you specify this, in a case where parse invokes help, the programSpec will be
 ```
 
 ## Error handling
-In a case where a user makes a mistake like trying to refer to an unknown command or option, the default is to issue an informative error message to the console and exit. If you'd like to override this behavior specify a configuration parameter `errorProcessor` as described below in Configuration parameters. 
+In a case where a user makes a mistake like trying to refer to an unknown command or option, the default is to issue an informative error message to the console and exit. If you'd like to override this behavior specify a configuration parameter `errorHandler` as described below in Configuration parameters. 
 
 ## Configuration parameters
 You can configure an argParser before calling parse by passing in a configuration object to its `configure` method. You can also pass this configuration object in to the `clop.createArgParser(cli, opt)` method as an optional second parameter following the cli.
@@ -132,7 +132,7 @@ argParser.configure({<options>});
 
 The legal configuration options are
 
-* __`errorProcessor`__: A function that will be called with two arguments: a string error ID and full error text instead of having errors reported to the console and the program terminated. If this option is specified but the value is empty or is not a function, the errors will be silently added to the programSpec as an `error` object with string fields `id` and `msg`. Silent erroring is primarily useful for testing.
+* __`errorHandler`__: A function that will be called with two arguments: a string error ID and full error text instead of having errors reported to the console and the program terminated. If this option is specified but the value is empty or is not a function, the errors will be silently added to the programSpec as an `error` object with string fields `id` and `msg`. Silent erroring is primarily useful for testing.
 
 
 

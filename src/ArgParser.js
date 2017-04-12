@@ -85,13 +85,13 @@ function normalizeCmd(input) {
     return _underscoreToCamel(_dashToUnderscore(input)).toLowerCase();
 }
 
-function _conditionalProduceError(cond, id, msg, errorProcessor) {
+function _conditionalProduceError(cond, id, msg, errorHandler) {
     if (cond) {
         return;
     }
     
-    if (errorProcessor) {
-        errorProcessor(id, msg);
+    if (errorHandler) {
+        errorHandler(id, msg);
     }
     else {
         util.errorAssertNoStack(false, id, msg);
@@ -100,7 +100,7 @@ function _conditionalProduceError(cond, id, msg, errorProcessor) {
     return {id, msg};;
 }
 
-function _selectCommand(cmdList, arg, errorProcessor) {
+function _selectCommand(cmdList, arg, errorHandler) {
     arg = arg || '';
     let skipArgs = 1;
     let command = arg;
@@ -120,7 +120,7 @@ function _selectCommand(cmdList, arg, errorProcessor) {
         cmdObj, 
         'Unknown command', 
         `Unknown command "${arg}"\nPossible commands: ${cmdList.map(cmd => cmd.command).join(', ')}`,
-        errorProcessor );
+        errorHandler );
     return [ cmdObj ? cmdObj.command : undefined, skipArgs, error ];
 }
 
@@ -150,7 +150,7 @@ function _optDone(opts, opt, args) {
     }
 }
 
-function _parseOpts(args, optsHash, errorProcessor) {
+function _parseOpts(args, optsHash, errorHandler) {
     const opts = {};
     let error;
     let currentOpt = null;
@@ -168,7 +168,7 @@ function _parseOpts(args, optsHash, errorProcessor) {
                     arg[0] !== '-' && currentOpt,
                     'Unknown option',
                     'Unknown option "' + arg + '"',
-                    errorProcessor
+                    errorHandler
                 );
                 currentOptArgs.push(arg);
             }
@@ -225,8 +225,8 @@ class ArgParser {
         this._optsHash = _makeOptHash(this._optsList);
     }
 
-    configure({errorProcessor, reportHelpContent = false, omitDefaultHelpOption = false} = {}) {
-        this._errorProcessor = errorProcessor;
+    configure({errorHandler, reportHelpContent = false, omitDefaultHelpOption = false} = {}) {
+        this._errorHandler = errorHandler;
         this._reportHelpContent = reportHelpContent;
         this._omitDefaultHelpOption = omitDefaultHelpOption;
     }
@@ -260,13 +260,13 @@ class ArgParser {
         else {
             let skipArgs;
             let err;
-            [ program.command, skipArgs, err ] = _selectCommand(this._cmdsList, argv[2], this._errorProcessor);
+            [ program.command, skipArgs, err ] = _selectCommand(this._cmdsList, argv[2], this._errorHandler);
             if (err) {
                 program.error = err;
                 return program;
             }
             const args = argv.slice(2 + skipArgs);
-            [ program.opts, err ] = _parseOpts(args, this._optsHash, this._errorProcessor);
+            [ program.opts, err ] = _parseOpts(args, this._optsHash, this._errorHandler);
             if (err) {
                 program.error = err;
             }

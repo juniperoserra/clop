@@ -10,7 +10,7 @@ describe('ArgParser', function() {
     beforeEach(function() {
         argParser = new ArgParser(cli);
         argParser.configure(
-            { errorProcessor: () => {} }
+            { errorHandler: () => {} }
         );
     });
 
@@ -28,4 +28,29 @@ describe('ArgParser', function() {
         const pgmSpec = argParser.parse(args2argv('check -chicken'));
         expect(pgmSpec.error.id).to.equal('Unknown option');
     });
+
+    it('should allow custom error handlers', function() {
+        let errId, errMsg;
+        argParser.configure({errorHandler: (id, msg) => {
+            errId = id;
+            errMsg = msg;
+        } });
+        const pgmSpec = argParser.parse(args2argv('choock'));
+        expect(errId).to.equal('Unknown command');
+    });
+
+    it('should parse a flag option', function() {
+        const pgmSpec = argParser.parse(args2argv('check -n'));
+        expect(pgmSpec.command).to.equal('check');
+        expect(pgmSpec.opts.noop).to.equal(true);
+    });
+
+    describe.skip('flag options', function() {
+        it('should reject an argument after flag option', function() {
+            const pgmSpec = argParser.parse(args2argv('check -n false'));
+            expect(pgmSpec.command).to.equal('check');
+            expect(pgmSpec.opts.noop).to.equal(true);
+        });
+    });
+    
 });
