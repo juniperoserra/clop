@@ -1,6 +1,6 @@
 
-console.log('I ran!');
+import ArgParser from './ArgParser'
 
-export default {
-    hi: 'Hi!'
+export const createArgParser = (cli) => {
+    return new ArgParser(cli);
 }
