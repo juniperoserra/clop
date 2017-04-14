@@ -216,13 +216,15 @@ function _formatValues(opt) {
 
 class ArgParser {
 
-    constructor(cli) {
+    constructor(cli, config) {
         this._optsList = cli.options || [];
         this._cmdsList = cli.commands || [];
 
         this._examples = cli.examples || '';
         this._usage = cli.usage || '';
         this._optsHash = _makeOptHash(this._optsList);
+
+        this.configure(config);
     }
 
     configure({errorHandler, reportHelpContent = false, omitDefaultHelpOption = false} = {}) {

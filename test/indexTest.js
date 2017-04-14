@@ -12,4 +12,12 @@ describe('Index', function() {
         const argParser = createArgParser({});
         expect(argParser).to.be.ok;
     });
+
+    it('should allow configuration paramters on createArgParser', function() {
+        let argParser = createArgParser({});
+        expect(argParser._reportHelpContent).to.be.falsy;
+        
+        argParser = createArgParser({}, {reportHelpContent: true});
+        expect(argParser._reportHelpContent).to.be.true;
+    });
 });

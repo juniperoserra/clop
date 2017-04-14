@@ -1,4 +1,4 @@
-# Clop (Command Line OPtions Parser)
+# Clop (**C**ommand **L**ine **O**ptions **P**arser)
 
 Clop is a utility for parsing commands and arguments for command-line "swiss-army" style programs. These are programs like "git" or "p4" that themselves just gateways to a set of commands with similar options. It also prints out an auto-formatted "help" document.
 
@@ -120,27 +120,28 @@ If you specify this, in a case where parse invokes help, the programSpec will be
 In a case where a user makes a mistake like trying to refer to an unknown command or option, the default is to issue an informative error message to the console and exit. If you'd like to override this behavior specify a configuration parameter `errorHandler` as described below in Configuration parameters. 
 
 ## Configuration parameters
-You can configure an argParser before calling parse by passing in a configuration object to its `configure` method. You can also pass this configuration object in to the `clop.createArgParser(cli, opt)` method as an optional second parameter following the cli.
+You can configure an argParser before calling parse by passing in a configuration object to its `configure` method. You can also pass this configuration object in to the `clop.createArgParser(cli, config)` method as an optional second parameter following the cli.
 
 ```javascript
-const argParser = clop.createArgParser(cli, {<options>});
+const argParser = clop.createArgParser(cli, {<config>});
 ```
 or
 ```javascript
-argParser.configure({<options>});
+argParser.configure({<config>});
 ```
 
 The legal configuration options are
 
 * __`errorHandler`__: A function that will be called with two arguments: a string error ID and full error text instead of having errors reported to the console and the program terminated. If this option is specified but the value is empty or is not a function, the errors will be silently added to the programSpec as an `error` object with string fields `id` and `msg`. Silent erroring is primarily useful for testing.
+* __`reportHelpContent`__: Set this to true to return help content rather than report help to the console and exit.
 
-
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+## TODO
+Things that don't yet work include
+* Command-less programs
+* Subcommands
+* Per-command help
+* Per-command options
+* Special "Flag" option type for booleans only
 
 ## Contributing
 

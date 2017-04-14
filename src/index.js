@@ -1,6 +1,6 @@
 
 import ArgParser from './ArgParser'
 
-export const createArgParser = (cli) => {
-    return new ArgParser(cli);
+export const createArgParser = (cli, config = {}) => {
+    return new ArgParser(cli, config);
 }
