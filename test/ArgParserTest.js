@@ -2,6 +2,12 @@ import ArgParser from '../src/ArgParser'
 import { expect } from 'chai';
 import cli from "./cli";
 
+const cliWithDefaultCommand = {...cli, commands: [...cli.commands, {
+    command: 'def',
+    desc: 'Default command',
+    default: true
+}]};
+
 const args2argv = (line) => {
     const args = [__dirname, __filename];
     line = line.trim().replace(/\s+/g, ' ');
@@ -19,14 +25,29 @@ describe('ArgParser', function() {
         });
     });
 
-    it('should parse a command', function() {
-        const pgmSpec = argParser.parse(args2argv('check'));
-        expect(pgmSpec.command).to.equal('check');
-    });
+    describe('commands', function() {
+        it('should parse a command', function() {
+            const pgmSpec = argParser.parse(args2argv('check'));
+            expect(pgmSpec.command).to.equal('check');
+        });
 
-    it('should error on an invalid command', function() {
-        const pgmSpec = argParser.parse(args2argv('choock'));
-        expect(pgmSpec.error.id).to.equal('Unknown command');
+        it('should error on an invalid command', function() {
+            const pgmSpec = argParser.parse(args2argv('choock'));
+            expect(pgmSpec.error.id).to.equal('Unknown command');
+        });
+
+        it('should parse a default command', function() {
+            argParser = new ArgParser(cliWithDefaultCommand);
+            const pgmSpec = argParser.parse(args2argv(''));
+            expect(pgmSpec.command).to.equal('def');
+        });
+
+        it('should parse a default command with options', function() {
+            argParser = new ArgParser(cliWithDefaultCommand);
+            const pgmSpec = argParser.parse(args2argv('-n'));
+            expect(pgmSpec.command).to.equal('def');
+            expect(pgmSpec.opts.noop).to.be.true;
+        });
     });
 
     it('should error on an invalid option', function() {
@@ -51,11 +72,7 @@ describe('ArgParser', function() {
         });
 
         it('should not provide help on absent command if there is a default command', function() {
-            argParser = new ArgParser({...cli, commands: [...cli.commands, {
-                command: 'def',
-                desc: 'Default command',
-                default: true
-            }]});
+            argParser = new ArgParser(cliWithDefaultCommand);
             const pgmSpec = argParser.parse(args2argv(''));
             expect(pgmSpec.command).to.equal('def');
             expect(pgmSpec.helpContent).to.be.undefined;

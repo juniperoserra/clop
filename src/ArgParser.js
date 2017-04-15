@@ -109,7 +109,7 @@ function _selectCommand(cmdList, arg, errorHandler) {
     }
 
     let cmdObj = undefined;
-    if (!command || command[0] === '_') {
+    if (!command || command[0] === '-') {
         cmdObj = cmdList.find(cmd => cmd.default);
         skipArgs = 0;
     } else {
