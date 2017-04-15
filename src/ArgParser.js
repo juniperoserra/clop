@@ -251,11 +251,10 @@ class ArgParser {
         return value.trim();
     }
 
-    parse(argv, continueAfterHelp) {
+    parse(argv) {
         const program = {};
 
         if ((argv.length < 3 && !this._cmdsList.some(cmd => cmd.default)) || argv[2] === 'help' || _asOption(argv[2], this._optsHash) === 'help') {
-            this.showHelp(continueAfterHelp);
             program.command = 'help';
             program.opts = {};
         }
@@ -273,6 +272,15 @@ class ArgParser {
                 program.error = err;
             }
         }
+
+        if (program.command === 'help' || program.opts.help) {
+            program.helpContent = this.getHelp();
+            if (!this._reportHelpContent) {
+                console.log(program.helpContent);
+                process.exit(0);
+            }
+        }
+
         return program;
     }
 
@@ -298,14 +306,6 @@ class ArgParser {
         return this._usage +
             commandHelp +
             '\n\nOptions:\n' + this._optsList.map(cmd => cmd.help).join('\n') + '\n\n' + this._examples;
-    }
-
-    showHelp(continueAfterHelp) {
-        const helpStr = this.getHelp();
-        console.log(helpStr);
-        if (!continueAfterHelp) {
-            process.exit(0);
-        }
     }
 
 }
