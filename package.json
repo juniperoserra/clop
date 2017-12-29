@@ -3,34 +3,38 @@
   "version": "0.0.1",
   "description": "A Command-Line OPtions argument processing utility.",
   "main": "lib/index.js",
+  "engines": {
+    "node": ">=4"
+  },
+  "repository": "github:juniperoserra/clop",
   "scripts": {
     "test": "cross-env BABEL_ENV=test mocha --reporter spec --compilers js:babel-core/register test/**/*Test.js",
     "build": "cross-env BABEL_ENV=production webpack --env=prod",
     "watch": "cross-env BABEL_ENV=production webpack --env=prod --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@insidelabs-git.mathworks.com:sgreenwo/clop.git"
-  },
   "keywords": [
     "commandline",
     "arguments"
   ],
+  "files": [
+    "lib/index.js"
+  ],
   "author": "Simon Greenwold",
   "license": "ISC",
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-core": "^6.24.1",
-    "babel-loader": "^6.4.1",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
-    "chai": "^3.5.0",
-    "cross-env": "^4.0.0",
-    "mocha": "^3.2.0",
-    "webpack": "^2.3.3"
+    "chai": "^4.1.2",
+    "cross-env": "^5.1.3",
+    "dirty-chai": "^2.0.1",
+    "mocha": "^4.1.0",
+    "webpack": "^3.10.0"
   },
   "dependencies": {
-    "babel-polyfill": "^6.23.0",
-    "chalk": "^1.1.3"
+    "babel-polyfill": "^6.26.0",
+    "chalk": "^2.3.0"
   }
 }
