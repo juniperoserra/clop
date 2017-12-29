@@ -76,7 +76,7 @@ You will usually want to make the cli specification into its own JavaScript modu
 Then create an `ArgParser` object with your cli:
 
 ```javascript
-const argParser = clop.createArgParse(cli); 
+const argParser = clop.createArgParser(cli); 
 ```
 
 At this point the parser can be configured for special cases, but usually it doesn't have to be.
