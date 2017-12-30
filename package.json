@@ -8,7 +8,7 @@
   },
   "repository": "github:juniperoserra/clop",
   "scripts": {
-    "test": "cross-env BABEL_ENV=test mocha --reporter spec --compilers js:babel-core/register test/**/*Test.js",
+    "test": "cross-env BABEL_ENV=test mocha --reporter spec --require babel-core/register test/**/*Test.js",
     "build": "cross-env BABEL_ENV=production webpack --env=prod",
     "watch": "cross-env BABEL_ENV=production webpack --env=prod --watch"
   },

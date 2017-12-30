@@ -12,6 +12,14 @@ const cliWithDefaultCommand = {...cli,
     default: true
   }]}
 
+const cliWithDefaultOption = {...cli,
+  options: [...cli.options, {
+    aliases: ['mode', 'm'],
+    desc: 'Mode',
+    default: 'test'
+  }]
+}
+
 const args2argv = (line) => {
   const args = [__dirname, __filename]
   line = line.trim().replace(/\s+/g, ' ')
@@ -130,6 +138,20 @@ describe('ArgParser', function () {
         expect(pgmSpec.command).to.equal('check')
         expect(pgmSpec.opts.noop).to.equal(true)
       })
+    })
+  })
+
+  describe('default options', function () {
+    it('should apply default values to options that specify them', function () {
+      argParser = new ArgParser(cliWithDefaultOption)
+      const pgmSpec = argParser.parse(args2argv('check'))
+      expect(pgmSpec.opts.mode).to.equal('test')
+    })
+
+    it('should overwrite default values supplied as arguments', function () {
+      argParser = new ArgParser(cliWithDefaultOption)
+      const pgmSpec = argParser.parse(args2argv('check -m prod'))
+      expect(pgmSpec.opts.mode).to.equal('prod')
     })
   })
 })

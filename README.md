@@ -26,7 +26,7 @@ $ tasker add -u mickey -important -hours 2 -d "Bake a cake"
 
 ## Commands
 
-The first arugment is the "command." If the cli specifies a default command, the command may be omitted. The command is never prefixed with a dash. In the example above, the command is "add." Everything else is options.
+The first argument is the "command." If the cli specifies a default command, the command may be omitted. The command is never prefixed with a dash. In the example above, the command is "add." Everything else is options.
 
 ## Options
 

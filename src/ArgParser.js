@@ -46,15 +46,19 @@ function _scrubOpt (arg) {
 
 function _makeOptHash (optionsSpec) {
   const optHash = {}
+  const defaults = {}
   optionsSpec.forEach(opt => {
     const argName = opt.optName || _scrubOpt(opt.aliases[0])
+    if (opt.default !== undefined) {
+      defaults[argName] = opt.default
+    }
     opt.aliases.forEach(alias => {
       alias = _scrubOpt(alias)
       util.assert(!optHash[alias], 'Redundant option alias: ' + alias)
       optHash[alias] = { name: argName, values: opt.values }
     })
   })
-  return optHash
+  return {optHash, defaults}
 }
 
 function _asOption (arg, optHash) {
@@ -213,7 +217,9 @@ class ArgParser {
 
     this._examples = cli.examples || ''
     this._usage = cli.usage || ''
-    this._optsHash = _makeOptHash(this._optsList)
+    const {optHash, defaults} = _makeOptHash(this._optsList)
+    this._optsHash = optHash
+    this._defaults = defaults
 
     this.configure(config)
   }
@@ -256,8 +262,11 @@ class ArgParser {
         program.error = err
         return program
       }
-      const args = argv.slice(2 + skipArgs);
-      [ program.opts, err ] = _parseOpts(args, this._optsHash, this._errorHandler)
+      const args = argv.slice(2 + skipArgs)
+      let opts
+      [ opts, err ] = _parseOpts(args, this._optsHash, this._errorHandler)
+      // Write any specified values over the defaults
+      program.opts = {...this._defaults, ...opts}
       if (err) {
         program.error = err
       }
