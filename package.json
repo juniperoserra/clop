@@ -20,7 +20,7 @@
     "lib/index.js"
   ],
   "author": "Simon Greenwold",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
