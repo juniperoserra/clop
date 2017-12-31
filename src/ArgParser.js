@@ -77,18 +77,19 @@ function _asOption (arg, optHash) {
     return undefined
   }
 
-  return optData.name
+  return optData
+}
+
+function _asOptionName (arg, optHash) {
+  const opt = _asOption(arg, optHash)
+  return opt ? opt.name : undefined
 }
 
 function normalizeCmd (input) {
   return _underscoreToCamel(_dashToUnderscore(input)).toLowerCase()
 }
 
-function _conditionalProduceError (cond, id, msg, errorHandler) {
-  if (cond) {
-    return
-  }
-
+function _produceError (id, msg, errorHandler) {
   if (errorHandler) {
     errorHandler(id, msg)
   } else {
@@ -96,6 +97,13 @@ function _conditionalProduceError (cond, id, msg, errorHandler) {
   }
 
   return {id, msg}
+}
+
+function _conditionalProduceError (cond, id, msg, errorHandler) {
+  if (cond) {
+    return
+  }
+  return _produceError(id, msg, errorHandler)
 }
 
 function _selectCommand (cmdList, arg, errorHandler) {
@@ -122,27 +130,63 @@ function _selectCommand (cmdList, arg, errorHandler) {
   return [ cmdObj ? cmdObj.command : undefined, skipArgs, error ]
 }
 
-function _optDone (opts, opt, args) {
+function _validateValue (opt, inValue, errorHandler) {
+  let value = `${inValue}`.trim()
+  const negated = (/^(no-|~|!)/).test(value)
+  if (opt.values) {
+    const bareValue = value.replace(/^(no-|~|!)/, '').toLowerCase()
+    for (const matchValue of opt.values) {
+      if (matchValue.toLowerCase() === bareValue) {
+        return {value: (negated ? '!' : '') + matchValue}
+      }
+    }
+    return {error: _produceError('Illegal value',
+      `Value "${value}" not valid for option "${opt.name}." Allowed values are ${opt.values}`,
+      errorHandler)}
+  }
+  return {value}
+}
+
+function _optDone (opts, opt, args, errorHandler) {
+  const addElement = (element, array) => {
+    if (_isNumeric(element)) {
+      element = parseInt(element, 10)
+    }
+    const result = _validateValue(opt, element, errorHandler)
+    array.push(element)
+    return result
+  }
+
   if (!opt && args.length === 0) {
     return
   }
   if (opt) {
     if (args.length === 0) { // Maybe check for legality of bool?
-      opts[opt] = true
+      opts[opt.name] = true
     } else {
       let fullArray = []
-      args.forEach(arg => {
-        arg.split(',').forEach(element => {
-          if (_isNumeric(element)) {
-            element = parseInt(element, 10)
+      for (const arg of args) {
+        // TODO: Have opt specify whether or not it can support lists
+        if (arg.includes(' ')) { // If there's a space in it, then it was in quotes
+          const result = addElement(arg, fullArray)
+          if (result.error) {
+            return result
           }
-          fullArray.push(element)
-        })
-      })
+        } else {
+          for (const element of arg.split(',')) {
+            if (element.length > 0) {
+              const result = addElement(element, fullArray)
+              if (result.error) {
+                return result
+              }
+            }
+          }
+        }
+      }
       if (fullArray.length === 1) {
         fullArray = fullArray[0]
       }
-      opts[opt] = fullArray
+      opts[opt.name] = fullArray
     }
   }
 }
@@ -152,26 +196,30 @@ function _parseOpts (args, optsHash, errorHandler) {
   let error
   let currentOpt = null
   let currentOptArgs = []
-  if (args) {
-    args.forEach(arg => {
-      const nextOpt = _asOption(arg, optsHash)
-      if (nextOpt) {
-        _optDone(opts, currentOpt, currentOptArgs)
-        currentOpt = nextOpt
-        currentOptArgs = []
-      } else {
-        error = _conditionalProduceError(
-                    arg[0] !== '-' && currentOpt,
-                    'Unknown option',
-                    'Unknown option "' + arg + '"',
-                    errorHandler
-                )
-        currentOptArgs.push(arg)
+  for (const arg of (args || [])) {
+    const nextOpt = _asOption(arg, optsHash)
+    if (nextOpt) {
+      const result = _optDone(opts, currentOpt, currentOptArgs, errorHandler)
+      if (result && result.error) {
+        return result
       }
-    })
+      currentOpt = nextOpt
+      currentOptArgs = []
+    } else {
+      error = _conditionalProduceError(
+                  arg[0] !== '-' && currentOpt,
+                  'Unknown option',
+                  'Unknown option "' + arg + '"',
+                  errorHandler
+              )
+      currentOptArgs.push(arg)
+    }
   }
-  _optDone(opts, currentOpt, currentOptArgs)
-  return [opts, error]
+  const result = _optDone(opts, currentOpt, currentOptArgs, errorHandler)
+  if (result && result.error) {
+    return result
+  }
+  return {opts, error}
 }
 
 function _formatAliases (aliases) {
@@ -230,45 +278,29 @@ class ArgParser {
     this._omitDefaultHelpOption = omitDefaultHelpOption
   }
 
-  validateValue (optionName, value) {
-    const opt = this._optsHash[optionName]
-    util.assert(opt, 'Unknown option "' + optionName + '"')
-    const negated = (/^(no-|~|!)/).test(value.trim())
-    if (opt.values) {
-      const bareValue = value.trim().replace(/^(no-|~|!)/, '').toLowerCase()
-      for (let i = 0; i < opt.values.length; i++) {
-        const matchValue = opt.values[i]
-        if (matchValue.toLowerCase() === bareValue) {
-          return (negated ? '!' : '') + matchValue
-        }
-      }
-      util.assertAlways('Value "' + value + '" not valid for option "' + optionName +
-                '." Allowed values are ' + opt.values)
-    }
-    return value.trim()
-  }
-
   parse (argv) {
     const program = {}
 
-    if ((argv.length < 3 && !this._cmdsList.some(cmd => cmd.default)) || argv[2] === 'help' || _asOption(argv[2], this._optsHash) === 'help') {
+    if ((argv.length < 3 && !this._cmdsList.some(cmd => cmd.default)) || argv[2] === 'help' || _asOptionName(argv[2], this._optsHash) === 'help') {
       program.command = 'help'
       program.opts = {}
     } else {
       let skipArgs
-      let err;
-      [ program.command, skipArgs, err ] = _selectCommand(this._cmdsList, argv[2], this._errorHandler)
-      if (err) {
-        program.error = err
+      let error;
+      [ program.command, skipArgs, error ] = _selectCommand(this._cmdsList, argv[2], this._errorHandler)
+      if (error) {
+        program.error = error
         return program
       }
       const args = argv.slice(2 + skipArgs)
       let opts
-      [ opts, err ] = _parseOpts(args, this._optsHash, this._errorHandler)
+      const result = _parseOpts(args, this._optsHash, this._errorHandler)
+      opts = result.opts
+      error = result.error
       // Write any specified values over the defaults
       program.opts = {...this._defaults, ...opts}
-      if (err) {
-        program.error = err
+      if (error) {
+        program.error = error
       }
     }
 

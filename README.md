@@ -73,6 +73,34 @@ const cli = {
 
 You will usually want to make the cli specification into its own JavaScript module to keep it separate from the rest of the code.
 
+### Command objects
+
+Command objects have the following form:
+
+```javascript
+{
+    command: 'name', // The name of the command
+    desc: 'Describe it', // The description of the command in help text
+    default: true // Optional, defaults to 'false.' If set true, this command will be assumed if when command is specified
+}
+```
+
+### Options objects
+
+Options objects have the following form:
+
+```javascript
+{
+    aliases: ['long', 'l'], // All the names the option can go by. The first one will be used as the key in the opts object, so make it the primary, non-abbreviated alias
+    args: '<arg>', // Optional. Used in help text and error messages to refer to the argument(s) of the option. Does not name the option in the resulting opts object.
+    desc: 'Describe it', // The description of the command in help text
+    values: ['one', 'two', 'three'], // Optional. Describes the allowable values of the argument
+    default: 'defaultValue' // Optional. A default argument to the option if none is specified or the option is absent
+}
+```
+
+### Create an ArgParser
+
 Then create an `ArgParser` object with your cli:
 
 ```javascript
