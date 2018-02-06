@@ -14,7 +14,9 @@ module.exports = function (env) {
     },
     output: {
       path: path.join(path.resolve(__dirname), 'lib'),
-      filename: '[name].js'
+      filename: '[name].js',
+      library: 'clop',
+      libraryTarget: 'umd'
     },
     devtool: env === 'dev' ? 'inline-source-map' : 'cheap-module-source-map',
     module: {
